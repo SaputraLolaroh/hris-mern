@@ -42,6 +42,11 @@ function Login() {
           {loading ? 'Memproses...' : 'Masuk'}
         </button>
       </form>
+      <div className="muted" style={{ fontSize: 12, marginTop: 18, padding: 12, border: '1px solid #d1d5db', borderRadius: 8 }}>
+        <p style={{ fontWeight: 600, marginTop: 0, marginBottom: 8 }}>Akun Demo untuk Mencoba Aplikasi</p>
+        <p style={{ margin: '6px 0' }}><strong>Admin Demo</strong><br />Email: admin@hris.com<br />Password: admin123</p>
+        <p style={{ margin: '10px 0 0' }}><strong>Karyawan Demo</strong><br />Email: budi@hris.com<br />Password: admin123</p>
+      </div>
     </div>
   );
 }
