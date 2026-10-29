@@ -42,9 +42,6 @@ function Login() {
           {loading ? 'Memproses...' : 'Masuk'}
         </button>
       </form>
-      <p className="muted" style={{ fontSize: 12, marginBottom: 0 }}>
-        Demo: admin@hris.com / admin123 (jalankan <code>npm run seed</code> di backend)
-      </p>
     </div>
   );
 }
