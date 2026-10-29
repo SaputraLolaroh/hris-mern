@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// Instance axios terpusat: baseURL backend + auto-attach JWT token
+// Gunakan domain yang sama dengan frontend; Vercel meneruskan /api ke backend.
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+  baseURL: import.meta.env.VITE_API_URL || '/api'
 });
 
 // Interceptor Request: selipkan token JWT ke setiap request
