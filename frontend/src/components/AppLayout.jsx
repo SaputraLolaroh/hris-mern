@@ -1,17 +1,21 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import LogoutButton from './LogoutButton.jsx';
+import { getUserRoleFromToken } from '../utils/helpers.js';
 
-// Layout bersama: sidebar + topbar untuk halaman-halaman privat
 function AppLayout({ title, children }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const isHrAdmin = getUserRoleFromToken() === 'HR_ADMIN';
 
   const menu = [
     { path: '/dashboard', label: '📊 Dashboard' },
     { path: '/attendance', label: '🕒 Absensi' },
+    ...(isHrAdmin ? [{ path: '/attendance/management', label: '📍 Manajemen Absensi' }] : []),
     { path: '/leaves', label: '📋 Cuti' },
-    { path: '/employees', label: '👥 Karyawan (HR)' },
-    { path: '/payrolls/report', label: '💰 Payroll (HR)' }
+    ...(isHrAdmin ? [
+      { path: '/employees', label: '👥 Karyawan (HR)' },
+      { path: '/payrolls/report', label: '💰 Payroll (HR)' }
+    ] : [])
   ];
 
   return (
@@ -22,7 +26,7 @@ function AppLayout({ title, children }) {
           {menu.map((item) => (
             <li
               key={item.path}
-              className={location.pathname.startsWith(item.path) ? 'active' : ''}
+              className={location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path + '/')) ? 'active' : ''}
               onClick={() => navigate(item.path)}
             >
               {item.label}
@@ -30,7 +34,7 @@ function AppLayout({ title, children }) {
           ))}
         </ul>
         <div className="sidebar-footer">
-          Logged in as: <strong>Member</strong>
+          Logged in as: <strong>{isHrAdmin ? 'HR Administrator' : 'Employee'}</strong>
         </div>
       </aside>
       <div className="main">
