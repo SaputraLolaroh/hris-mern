@@ -6,6 +6,7 @@ import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import EmployeeManagement from './pages/EmployeeManagement.jsx';
 import AttendanceForm from './pages/AttendanceForm.jsx';
+import AttendanceManagement from './pages/AttendanceManagement.jsx';
 import LeaveManagement from './pages/LeaveManagement.jsx';
 import PayrollReport from './pages/PayrollReport.jsx';
 import Unauthorized from './pages/Unauthorized.jsx';
@@ -15,11 +16,9 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Halaman publik */}
         <Route path="/login" element={<Login />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
 
-        {/* Halaman member: semua yang sudah login */}
         <Route element={<ProtectedRoute />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -27,9 +26,9 @@ function App() {
           <Route path="/leaves" element={<LeaveManagement />} />
         </Route>
 
-        {/* Halaman khusus HR_ADMIN */}
         <Route element={<RoleRoute allowedRoles={['HR_ADMIN']} />}>
           <Route path="/employees" element={<EmployeeManagement />} />
+          <Route path="/attendance/management" element={<AttendanceManagement />} />
           <Route path="/payrolls/report" element={<PayrollReport />} />
         </Route>
 
