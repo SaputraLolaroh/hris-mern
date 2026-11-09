@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS employees (
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,              -- bcrypt hash (lihat backend/scripts/seed.js)
+    password VARCHAR(255) NOT NULL,
     phone_number VARCHAR(20),
     department_id INT REFERENCES departments(id) ON DELETE SET NULL,
     position VARCHAR(100) NOT NULL,
@@ -36,14 +36,20 @@ CREATE TABLE IF NOT EXISTS attendances (
     status VARCHAR(20) CHECK (status IN ('present', 'late', 'permission', 'sick', 'alpha')) DEFAULT 'present',
     overtime_hours DECIMAL(4,2) DEFAULT 0.00,
     notes TEXT,
+    checkin_latitude DOUBLE PRECISION,
+    checkin_longitude DOUBLE PRECISION,
+    checkin_accuracy_meters DOUBLE PRECISION,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (employee_id, date)
 );
 
+CREATE INDEX IF NOT EXISTS idx_attendances_date_employee
+    ON attendances (date DESC, employee_id);
+
 CREATE TABLE IF NOT EXISTS leaves (
     id SERIAL PRIMARY KEY,
     employee_id INT REFERENCES employees(id) ON DELETE CASCADE,
-    leave_type VARCHAR(50) NOT NULL,             -- annual, sick, unpaid
+    leave_type VARCHAR(50) NOT NULL,
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     reason TEXT NOT NULL,
@@ -69,6 +75,5 @@ CREATE TABLE IF NOT EXISTS payrolls (
     UNIQUE (employee_id, period_month, period_year)
 );
 
--- Contoh data awal
 INSERT INTO departments (name) VALUES ('Information Technology'), ('Human Resources'), ('Finance')
 ON CONFLICT DO NOTHING;
