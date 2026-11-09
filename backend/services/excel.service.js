@@ -1,12 +1,10 @@
 const ExcelJS = require('exceljs');
 
-// Membuat workbook Excel rekap absensi dari rows hasil query database
 async function buildAttendanceWorkbook(attendanceList) {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Rekap Absensi');
 
-  // Judul laporan
-  worksheet.mergeCells('A1:H1');
+  worksheet.mergeCells('A1:K1');
   const titleCell = worksheet.getCell('A1');
   titleCell.value = 'LAPORAN REKAPITULASI ABSENSI KARYAWAN';
   titleCell.font = { name: 'Arial', size: 14, bold: true, color: { argb: 'FFFFFF' } };
@@ -14,17 +12,16 @@ async function buildAttendanceWorkbook(attendanceList) {
   titleCell.alignment = { horizontal: 'center', vertical: 'middle' };
   worksheet.getRow(1).height = 30;
 
-  // Header tabel
   const headerRow = worksheet.addRow([
     'NIK', 'Nama Karyawan', 'Departemen', 'Tanggal',
-    'Jam Masuk', 'Jam Keluar', 'Status', 'Lembur (Jam)'
+    'Jam Masuk', 'Jam Keluar', 'Status', 'Lembur (Jam)',
+    'Latitude Check-in', 'Longitude Check-in', 'Akurasi GPS (meter)'
   ]);
   headerRow.font = { name: 'Arial', size: 11, bold: true, color: { argb: 'FFFFFF' } };
   headerRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '2F5597' } };
-  headerRow.alignment = { horizontal: 'center', vertical: 'middle' };
-  headerRow.height = 24;
+  headerRow.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+  headerRow.height = 32;
 
-  // Isi data + zebra striping
   attendanceList.forEach((item, index) => {
     const row = worksheet.addRow([
       item.nik,
@@ -34,7 +31,10 @@ async function buildAttendanceWorkbook(attendanceList) {
       item.clock_in || '-',
       item.clock_out || '-',
       item.status.toUpperCase(),
-      item.overtime_hours || 0
+      item.overtime_hours || 0,
+      item.checkin_latitude ?? '-',
+      item.checkin_longitude ?? '-',
+      item.checkin_accuracy_meters ?? '-'
     ]);
     if (index % 2 === 0) {
       row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F9FBFD' } };
@@ -42,16 +42,17 @@ async function buildAttendanceWorkbook(attendanceList) {
     row.alignment = { vertical: 'middle' };
   });
 
-  // Auto-width kolom
   worksheet.columns.forEach((column) => {
     let maxLength = 0;
     column.eachCell({ includeEmpty: true }, (cell) => {
       const len = cell.value ? cell.value.toString().length : 10;
       if (len > maxLength) maxLength = len;
     });
-    column.width = Math.max(maxLength + 4, 12);
+    column.width = Math.min(Math.max(maxLength + 4, 12), 32);
   });
 
+  worksheet.views = [{ state: 'frozen', ySplit: 2 }];
+  worksheet.autoFilter = { from: 'A2', to: 'K2' };
   return workbook;
 }
 
