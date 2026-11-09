@@ -12,14 +12,18 @@ function AttendanceForm() {
     return () => clearInterval(timer);
   }, []);
 
-  // Ambil koordinat GPS browser (Promise wrapper)
+  // Ambil koordinat dan akurasi GPS dari browser.
   const getCoordinates = () =>
     new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
         reject(new Error('Geolocation tidak didukung oleh browser Anda.'));
       } else {
         navigator.geolocation.getCurrentPosition(
-          (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+          (pos) => resolve({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            accuracy: pos.coords.accuracy
+          }),
           () => reject(new Error('Gagal mendeteksi lokasi. Pastikan izin GPS/Lokasi diaktifkan.')),
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
@@ -33,15 +37,11 @@ function AttendanceForm() {
       setLoading(true);
       setMessage({ text: 'Mendeteksi lokasi GPS Anda...', type: 'info' });
 
-      let latitude = null, longitude = null;
-      if (type === 'check-in') {
-        const coords = await getCoordinates();
-        latitude = coords.latitude;
-        longitude = coords.longitude;
-      }
+      let gps = {};
+      if (type === 'check-in') gps = await getCoordinates();
 
       setMessage({ text: 'Mengirim data ke server...', type: 'info' });
-      const response = await api.post('/attendances/clock', { type, latitude, longitude });
+      const response = await api.post('/attendances/clock', { type, ...gps });
       if (response.data.success) setMessage({ text: response.data.message, type: 'success' });
     } catch (err) {
       setMessage({ text: err.response?.data?.message || err.message || 'Terjadi kesalahan koneksi.', type: 'error' });
@@ -64,7 +64,7 @@ function AttendanceForm() {
             {message.text}
           </p>
         )}
-        <div style={{ display: 'flex', gap: 15, justifyContent: 'center', marginTop: 20 }}>
+        <div style={{ display: 'flex', gap: 15, justifyContent: 'center', marginTop: 20, flexWrap: 'wrap' }}>
           <button className="btn btn-success" onClick={() => handleClockAction('check-in')} disabled={loading}>
             📥 Check-In (GPS)
           </button>
@@ -72,6 +72,9 @@ function AttendanceForm() {
             📤 Check-Out
           </button>
         </div>
+        <p className="muted" style={{ fontSize: 12, marginTop: 18 }}>
+          Lokasi dan akurasi GPS dicatat saat check-in untuk keperluan verifikasi absensi oleh HRD.
+        </p>
       </div>
     </AppLayout>
   );
